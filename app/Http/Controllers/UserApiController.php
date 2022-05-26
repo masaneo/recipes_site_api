@@ -55,7 +55,9 @@ class UserApiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = User::find($id);
+        $user->update($request->all());
+        return $user;
     }
 
     /**
@@ -66,7 +68,7 @@ class UserApiController extends Controller
      */
     public function destroy($id)
     {
-        //
+        return User::destroy($id);
     }
 
     public function login(Request $request)

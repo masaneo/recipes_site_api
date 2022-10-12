@@ -7,6 +7,7 @@ use App\Http\Controllers\UserApiController;
 use App\Http\Controllers\IngredientApiController;
 use App\Http\Controllers\CategoryApiController;
 use App\Http\Controllers\ReceiptApiController;
+use App\Http\Controllers\VoteApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,3 +31,5 @@ Route::get('/receipts/ingredients/getIngredients', [IngredientApiController::cla
 Route::post('/receipts/categories/addCategory', [CategoryApiController::class, 'addCategory']);
 Route::get('/receipts/categories/getAllCategories', [CategoryApiController::class, 'getAllCategories']);
 Route::post('/receipts/addReceipt', [ReceiptApiController::class, 'addReceipt']);
+Route::post('/receipts/votes/addVote', [VoteApiController::class, 'addVote']);
+Route::get('/receipts/votes/getAverageVote', [VoteApiController::class, 'getAverageVote']);

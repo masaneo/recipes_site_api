@@ -18,6 +18,7 @@ class Receipt extends Model
      */
     protected $fillable = [
         'name',
+        'userId',
     ];
 
     /**

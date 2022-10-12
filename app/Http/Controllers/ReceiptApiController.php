@@ -7,13 +7,18 @@ use App\Models\Receipt;
 use App\Models\CookingStep;
 use App\Models\IngredientReceipt;
 use App\Models\ReceiptCategory;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ReceiptApiController extends Controller
 {
     public function addReceipt(Request $req){
         DB::transaction(function() use ($req){
-            $receiptId = Receipt::create(['name' => $req->name])->id;
+            //$id = User::where('api_token', '=', $req->token)->first()->id;
+            
+            $id = 1; // for now, delete this later
+
+            $receiptId = Receipt::create(['name' => $req->name, 'userId' => $id])->id;
 
             foreach($req->steps as $number => $step){
                 CookingStep::create(['stepId' => $number, 'receiptId' => $receiptId, 'step' => $step]);

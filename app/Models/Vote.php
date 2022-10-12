@@ -18,6 +18,7 @@ class Vote extends Model
      */
     protected $fillable = [
         'userId',
+        'receiptId',
         'vote',
     ];
 

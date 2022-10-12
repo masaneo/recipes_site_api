@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UserApiController;
+use App\Http\Controllers\IngredientApiController;
+use App\Http\Controllers\CategoryApiController;
+use App\Http\Controllers\ReceiptApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +25,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::resource('/users', UserApiController::class);
 Route::post('/users/auth', [UserApiController::class, 'login']);
+Route::post('/receipts/ingredients/addIngredient', [IngredientApiController::class, 'addIngredient']);
+Route::get('/receipts/ingredients/getIngredients', [IngredientApiController::class, 'getIngredients']);
+Route::post('/receipts/categories/addCategory', [CategoryApiController::class, 'addCategory']);
+Route::get('/receipts/categories/getAllCategories', [CategoryApiController::class, 'getAllCategories']);
+Route::post('/receipts/addReceipt', [ReceiptApiController::class, 'addReceipt']);

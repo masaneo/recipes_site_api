@@ -28,7 +28,7 @@ class UserApiController extends Controller
     public function store(Request $request)
     {
         return User::create([
-            'name' => $request['name'],
+            'username' => $request['username'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
             'api_token' => Str::random(60),

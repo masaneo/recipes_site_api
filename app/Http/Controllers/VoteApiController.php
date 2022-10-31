@@ -13,11 +13,11 @@ class VoteApiController extends Controller
 
         $id = 1; // for now, delete later;
 
-        if(Vote::where('receiptId', '=', $req->receiptId)->where('userId', '=', $id)->first()){
-            Vote::where('receiptId', '=', $req->receiptId)->where('userId', '=', $id)->update(['vote' => $req->vote]);
+        if(Vote::where('recipeId', '=', $req->recipeId)->where('userId', '=', $id)->first()){
+            Vote::where('recipeId', '=', $req->recipeId)->where('userId', '=', $id)->update(['vote' => $req->vote]);
             return Response(['message' => 'Successfully updated vote']);
         } else {
-            if(Vote::create(['userId' => $id, 'receiptId' => $req->receiptId,'vote' => $req->vote])){
+            if(Vote::create(['userId' => $id, 'recipeId' => $req->recipeId,'vote' => $req->vote])){
                 return Response(['message' => 'Successfully voted']);
             }
         }
@@ -26,8 +26,8 @@ class VoteApiController extends Controller
     }
 
     public function getAverageVote(Request $req){
-        $count = Vote::where('receiptId', '=', $req->receiptId)->count();
-        $sum = Vote::where('receiptId', '=', $req->receiptId)->sum('vote');
+        $count = Vote::where('recipeId', '=', $req->recipeId)->count();
+        $sum = Vote::where('recipeId', '=', $req->recipeId)->sum('vote');
 
         $average = $sum / $count;
 

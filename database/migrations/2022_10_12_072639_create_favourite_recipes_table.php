@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ingredients_receipts', function (Blueprint $table) {
-            $table->integer("ingredientId");
-            $table->integer("receiptId");
-            $table->string("amount");
+        Schema::create('favourite_recipes', function (Blueprint $table) {
+            $table->id("favouriteId");
+            $table->integer("userId");
+            $table->integer("recipeID");
             $table->timestamps();
-
-            $table->primary(['ingredientId', 'receiptId']);
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ingredients_receipts');
+        Schema::dropIfExists('favourite_recipes');
     }
 };

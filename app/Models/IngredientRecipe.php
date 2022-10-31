@@ -11,7 +11,7 @@ class IngredientReceipt extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'ingredients_receipts';
+    protected $table = 'ingredients_recipes';
 
     /**
      * The attributes that are mass assignable.

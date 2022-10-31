@@ -13,11 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('favourite_receipts', function (Blueprint $table) {
-            $table->id("favouriteId");
-            $table->integer("userId");
-            $table->integer("receiptID");
+        Schema::create('recipes_categories', function (Blueprint $table) {
+            $table->integer("categoryId");
+            $table->integer("recipeId");
             $table->timestamps();
+
+            $table->primary(['categoryId', 'recipeId']);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('favourite_receipts');
+        Schema::dropIfExists('recipes_categories');
     }
 };

@@ -28,7 +28,12 @@ class RecipeApiController extends Controller
                 RecipeCategory::create(['categoryId' => $category, 'recipeId' => $recipeId]);
             }
             foreach($req->ingredients as $ingredient){
-                IngredientRecipe::create(['ingredientId' => $ingredient['ingredientId'], 'recipeId' => $recipeId, 'amount' => $ingredient['amount']]);
+                IngredientRecipe::create([
+                    'ingredientId' => $ingredient['ingredientId'], 
+                    'recipeId' => $recipeId, 
+                    'amount' => $ingredient['amount'], 
+                    'unitId' => $ingredient['unitId']
+                ]);
             }
         });
 

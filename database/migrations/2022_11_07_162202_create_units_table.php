@@ -13,14 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ingredients_recipes', function (Blueprint $table) {
-            $table->integer("ingredientId");
-            $table->integer("recipeId");
-            $table->string("amount");
-            $table->integer("unitId");
+        Schema::create('units', function (Blueprint $table) {
+            $table->id();
+            $table->string("name");
             $table->timestamps();
-
-            $table->primary(['ingredientId', 'recipeId']);
         });
     }
 
@@ -31,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ingredients_recipes');
+        Schema::dropIfExists('units');
     }
 };

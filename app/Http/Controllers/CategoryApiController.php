@@ -16,6 +16,6 @@ class CategoryApiController extends Controller
     }
     
     public function getAllCategories(Request $req){
-        return Category::all();
+        return Response(["categories" => Category::all()]);
     }
 }

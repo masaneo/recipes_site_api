@@ -8,6 +8,7 @@ use App\Http\Controllers\IngredientApiController;
 use App\Http\Controllers\CategoryApiController;
 use App\Http\Controllers\RecipeApiController;
 use App\Http\Controllers\VoteApiController;
+use App\Http\Controllers\UnitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,3 +36,4 @@ Route::get('/recipes/getAllRecipes', [RecipeApiController::class, 'getAllRecipes
 Route::post('/recipes/getSingleRecipe', [RecipeApiController::class, 'getSingleRecipe']);
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);
 Route::get('/recipes/votes/getAverageVote', [VoteApiController::class, 'getAverageVote']);
+Route::get('/recipes/units/getAllUnits', [UnitController::class, 'getAllUnits']);

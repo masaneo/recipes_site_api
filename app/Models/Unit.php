@@ -4,14 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class IngredientRecipe extends Model
+class Unit extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    protected $table = 'ingredients_recipes';
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -19,10 +15,7 @@ class IngredientRecipe extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'ingredientId',
-        'recipeId',
-        'amount',
-        'unitId',
+        'name',
     ];
 
     /**
@@ -42,7 +35,4 @@ class IngredientRecipe extends Model
     protected $casts = [
         
     ];
-
-    protected $primaryKey = ['ingredientId', 'receiptId'];
-    public $incrementing = false;
 }

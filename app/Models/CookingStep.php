@@ -18,7 +18,7 @@ class CookingStep extends Model
      */
     protected $fillable = [
         'stepId',
-        'receiptId',
+        'recipeId',
         'step',
     ];
 
@@ -40,6 +40,6 @@ class CookingStep extends Model
         
     ];
 
-    protected $primaryKey = ['stepId', 'receiptId'];
+    protected $primaryKey = ['stepId', 'recipeId'];
     public $incrementing = false;
 }

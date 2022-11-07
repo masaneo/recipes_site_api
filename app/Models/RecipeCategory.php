@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class ReceiptCategory extends Model
+class RecipeCategory extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected $table = 'recipes_categories';
 
     /**
      * The attributes that are mass assignable.
@@ -18,7 +20,7 @@ class ReceiptCategory extends Model
      */
     protected $fillable = [
         'categoryId',
-        'receiptId',
+        'recipeId',
     ];
 
     /**
@@ -39,6 +41,6 @@ class ReceiptCategory extends Model
         
     ];
 
-    protected $primaryKey = ['categoryId', 'receiptId'];
+    protected $primaryKey = ['categoryId', 'recipeId'];
     public $incrementing = false;
 }

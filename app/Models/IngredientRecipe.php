@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class IngredientReceipt extends Model
+class IngredientRecipe extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -20,7 +20,7 @@ class IngredientReceipt extends Model
      */
     protected $fillable = [
         'ingredientId',
-        'receiptId',
+        'recipeId',
         'amount',
     ];
 

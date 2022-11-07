@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Receipt extends Model
+class Recipe extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 

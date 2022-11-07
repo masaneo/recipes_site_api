@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('cooking_steps', function (Blueprint $table) {
             $table->integer("stepId");
-            $table->integer("receiptId");
+            $table->integer("recipeId");
             $table->string("step");
             $table->timestamps();
 
-            $table->primary(['stepId', 'receiptId']);
+            $table->primary(['stepId', 'recipeId']);
         });
     }
 

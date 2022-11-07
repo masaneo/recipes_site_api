@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class FavouriteReceipt extends Model
+class FavouriteRecipe extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected $table = 'favourite_recipes';
 
     /**
      * The attributes that are mass assignable.
@@ -18,7 +20,7 @@ class FavouriteReceipt extends Model
      */
     protected $fillable = [
         'userId',
-        'receiptId',
+        'recipeId',
     ];
 
     /**

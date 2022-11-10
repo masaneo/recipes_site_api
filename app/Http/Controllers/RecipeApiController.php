@@ -15,25 +15,46 @@ class RecipeApiController extends Controller
 {
     public function addRecipe(Request $req){
         DB::transaction(function() use ($req){
-            //$id = User::where('api_token', '=', $req->token)->first()->id;
+            $id = User::where('api_token', '=', $req->token)->first()->id;
             
-            $id = 1; // for now, delete this later
-
             $recipeId = Recipe::create(['name' => $req->name, 'userId' => $id])->id;
 
             foreach($req->steps as $number => $step){
-                CookingStep::create(['stepId' => $number, 'recipeId' => $recipeId, 'step' => $step]);
+                if($step['step'] !== null){
+                    CookingStep::create(['stepId' => $number, 'recipeId' => $recipeId, 'step' => $step['step']]);
+                }
             }
             foreach($req->categories as $category){
-                RecipeCategory::create(['categoryId' => $category, 'recipeId' => $recipeId]);
+                if($category['categoryId'] !== null){
+                    RecipeCategory::create(['categoryId' => $category['categoryId'], 'recipeId' => $recipeId]);
+                }
             }
             foreach($req->ingredients as $ingredient){
-                IngredientRecipe::create([
-                    'ingredientId' => $ingredient['ingredientId'], 
-                    'recipeId' => $recipeId, 
-                    'amount' => $ingredient['amount'], 
-                    'unitId' => $ingredient['unitId']
-                ]);
+                if($ingredient['ingredient'] !== null){
+                    if($ing = Ingredient::where('name', '=', $ingredient['ingredient'])->first()){
+                        IngredientRecipe::create([
+                            'ingredientId' => $ing->ingredientId, 
+                            'recipeId' => $recipeId, 
+                            'amount' => $ingredient['quantity'], 
+                            'unitId' => $ingredient['unit']
+                        ]);
+                    } else {
+                        $ing = Ingredient::create([
+                            'name' => $ingredient['ingredient']
+                        ]);
+
+                        $ing->save();
+
+                        IngredientRecipe::create([
+                            'ingredientId' => $ing->ingredientId, 
+                            'recipeId' => $recipeId, 
+                            'amount' => $ingredient['quantity'], 
+                            'unitId' => $ingredient['unit']
+                        ]);
+                    }
+                
+                }
+                
             }
         });
 

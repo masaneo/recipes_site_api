@@ -31,28 +31,18 @@ class RecipeApiController extends Controller
             }
             foreach($req->ingredients as $ingredient){
                 if($ingredient['ingredient'] !== null){
-                    if($ing = Ingredient::where('name', '=', $ingredient['ingredient'])->first()){
-                        IngredientRecipe::create([
-                            'ingredientId' => $ing->ingredientId, 
-                            'recipeId' => $recipeId, 
-                            'amount' => $ingredient['quantity'], 
-                            'unitId' => $ingredient['unit']
-                        ]);
+                    $ing = Ingredient::where('name', '=', $ingredient['ingredient'])->first();
+                    if($ing !== null) {
+                        $ing = $ing->ingredientId;
                     } else {
-                        $ing = Ingredient::create([
-                            'name' => $ingredient['ingredient']
-                        ]);
-
-                        $ing->save();
-
-                        IngredientRecipe::create([
-                            'ingredientId' => $ing->ingredientId, 
-                            'recipeId' => $recipeId, 
-                            'amount' => $ingredient['quantity'], 
-                            'unitId' => $ingredient['unit']
-                        ]);
+                        $ing = Ingredient::insertGetId(['name' => $ingredient['ingredient']]);
                     }
-                
+                    IngredientRecipe::create([
+                        'ingredientId' => $ing, 
+                        'recipeId' => $recipeId, 
+                        'amount' => $ingredient['quantity'], 
+                        'unitId' => $ingredient['unit']
+                    ]);
                 }
                 
             }

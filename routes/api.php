@@ -34,6 +34,8 @@ Route::get('/recipes/categories/getAllCategories', [CategoryApiController::class
 Route::post('/recipes/addRecipe', [RecipeApiController::class, 'addRecipe']);
 Route::get('/recipes/getAllRecipes', [RecipeApiController::class, 'getAllRecipes']);
 Route::post('/recipes/getSingleRecipe', [RecipeApiController::class, 'getSingleRecipe']);
+Route::get('/recipes/getSingleRecipe/{id}/getImage', [RecipeApiController::class, 'getSingleRecipeImage']);
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);
 Route::get('/recipes/votes/getAverageVote', [VoteApiController::class, 'getAverageVote']);
+Route::get('/recipes/votes/getUserVote/{token}/{recipeId}', [VoteApiController::class, 'getUserVote']);
 Route::get('/recipes/units/getAllUnits', [UnitController::class, 'getAllUnits']);

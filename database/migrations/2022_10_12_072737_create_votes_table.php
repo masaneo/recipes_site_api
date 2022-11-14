@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id("voteId");
             $table->integer("userId");
             $table->integer("recipeId");
-            $table->integer("vote");
+            $table->float("vote");
             $table->timestamps();
         });
     }

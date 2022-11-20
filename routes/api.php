@@ -24,18 +24,28 @@ use App\Http\Controllers\UnitController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+//User routes
 Route::resource('/users', UserApiController::class);
 Route::post('/users/auth', [UserApiController::class, 'login']);
+
+//Ingredients routes
 Route::post('/recipes/ingredients/addIngredient', [IngredientApiController::class, 'addIngredient']);
 Route::get('/recipes/ingredients/getIngredients', [IngredientApiController::class, 'getIngredients']);
+
+//Category Routes
 Route::post('/recipes/categories/addCategory', [CategoryApiController::class, 'addCategory']);
 Route::get('/recipes/categories/getAllCategories', [CategoryApiController::class, 'getAllCategories']);
+
+//Recipe Routes
 Route::post('/recipes/addRecipe', [RecipeApiController::class, 'addRecipe']);
 Route::get('/recipes/getAllRecipes', [RecipeApiController::class, 'getAllRecipes']);
 Route::post('/recipes/getSingleRecipe', [RecipeApiController::class, 'getSingleRecipe']);
 Route::get('/recipes/getSingleRecipe/{id}/getImage', [RecipeApiController::class, 'getSingleRecipeImage']);
+
+//Vote routes
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);
 Route::get('/recipes/votes/getAverageVote', [VoteApiController::class, 'getAverageVote']);
-Route::get('/recipes/votes/getUserVote/{token}/{recipeId}', [VoteApiController::class, 'getUserVote']);
+Route::get('/recipes/votes/getUserVote', [VoteApiController::class, 'getUserVote']);
+
+//Other routes
 Route::get('/recipes/units/getAllUnits', [UnitController::class, 'getAllUnits']);

@@ -25,14 +25,17 @@ class VoteApiController extends Controller
         return Response(['message' => 'Failed to vote']);
     }
 
-    public function getUserVote($token, $recipeId){
-        $id = User::where('api_token', '=', $token)->first()->id;
+    public function getUserVote(Request $req){
+        if($req->token){
+            $id = User::where('api_token', '=', $req->token)->first()->id;
 
-        if($vote = Vote::where('userId', '=', $id)->where('recipeId', '=', $recipeId)->first()){
-            return Response(["vote" => $vote->vote]);
-        } else {
-            return Response(["vote" => "0"]);
+            if($vote = Vote::where('userId', '=', $id)->where('recipeId', '=', $req->recipeId)->first()){
+                return Response(["vote" => $vote->vote]);
+            } else {
+                return Response(["vote" => "0"]);
+            }
         }
+        return Response(["vote" => "0"]);
     }
 
     public function getAverageVote(Request $req){

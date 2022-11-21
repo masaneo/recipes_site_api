@@ -14,11 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('votes', function (Blueprint $table) {
-            $table->id("voteId");
             $table->integer("userId");
             $table->integer("recipeId");
             $table->float("vote");
             $table->timestamps();
+
+            $table->primary(['userId', 'recipeId']);
         });
     }
 

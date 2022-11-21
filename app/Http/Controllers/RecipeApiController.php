@@ -8,6 +8,7 @@ use App\Models\CookingStep;
 use App\Models\IngredientRecipe;
 use App\Models\Ingredient;
 use App\Models\RecipeCategory;
+use App\Models\FavouriteRecipe;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -57,6 +58,14 @@ class RecipeApiController extends Controller
         return Recipe::all()->toJson();
     }
 
+    public function getUserRecipes(Request $req){
+        $token = $req->token;
+
+        $userId = User::where('api_token', '=', $token)->first()->id;
+
+        return Recipe::where('userId', '=', $userId)->get();
+    }
+
     public function getSingleRecipe(Request $req){
         $recipe = Recipe::where('recipeId', '=', $req->id)->first(); //returns recipe with given id
         $author = User::where('id', '=', $recipe->userId)->first(); //returns user that added that recipe
@@ -98,5 +107,16 @@ class RecipeApiController extends Controller
             return Response(["image" => Storage::get('images/no_image_available.txt')]);
         }
         
+    }
+
+    public function addRecipeToFavourite(Request $req){
+        $userId = User::where('api_token', '=', $req->token)->first()->id;
+        $recipeId = $req->recipeId;
+
+        if(FavouriteRecipe::firstOrCreate(['userId'=>$userId, 'recipeId'=>$recipeId])){
+            return Response(["message" => "Pomyślnie dodano przepis do ulubionych"]);
+        } else {
+            return Response(["message" => "Nie udało się dodać przepisu do ulubionych"]);
+        }
     }
 }

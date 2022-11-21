@@ -43,6 +43,6 @@ class IngredientRecipe extends Model
         
     ];
 
-    protected $primaryKey = ['ingredientId', 'receiptId'];
+    protected $primaryKey = ['ingredientId', 'recipeId'];
     public $incrementing = false;
 }

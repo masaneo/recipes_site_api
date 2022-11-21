@@ -39,8 +39,12 @@ class VoteApiController extends Controller
         $count = Vote::where('recipeId', '=', $req->recipeId)->count();
         $sum = Vote::where('recipeId', '=', $req->recipeId)->sum('vote');
 
-        $average = $sum / $count;
+        if($count > 0){
+            $average = $sum / $count;
+        } else {
+            $average = 0;
+        }
 
-        return $average;
+        return Response(["averageVote" => number_format($average, 2)]);
     }
 }

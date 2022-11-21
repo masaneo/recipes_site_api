@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\HasCompositePrimaryKeyTrait;
 
 class FavouriteRecipe extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasCompositePrimaryKeyTrait;
 
     protected $table = 'favourite_recipes';
 
@@ -40,4 +41,7 @@ class FavouriteRecipe extends Model
     protected $casts = [
         
     ];
+    
+    protected $primaryKey = ['userId', 'recipeId'];
+    public $incrementing = false;
 }

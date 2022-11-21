@@ -67,6 +67,9 @@ class RecipeApiController extends Controller
     }
 
     public function getSingleRecipe(Request $req){
+        if($req->token){
+            $userId = User::where('api_token', '=', $req->token)->first()->id;
+        }
         $recipe = Recipe::where('recipeId', '=', $req->id)->first(); //returns recipe with given id
         $author = User::where('id', '=', $recipe->userId)->first(); //returns user that added that recipe
         $cookingSteps = CookingStep::where('recipeId', '=', $req->id)->get(); //return cooking steps
@@ -85,6 +88,14 @@ class RecipeApiController extends Controller
         ->join("units", "ingredients_recipes.unitId", "=", "units.id")
         ->get(); //joins ingredients and ingredients_recipes and returns ingredients name, id, recipeId, amount
         
+        $favourite = false;
+
+        if($req->token){
+            if(FavouriteRecipe::where('userId', '=', $userId)->where('recipeId', '=', $req->id)->first()){
+                $favourite = true;
+            }
+        }
+
         if(Storage::get('images/' . $req->id . '.txt')) {
             $img = Storage::get('images/' . $req->id . '.txt');
         } else {
@@ -96,7 +107,8 @@ class RecipeApiController extends Controller
             "cookingSteps" => $cookingSteps, 
             "ingredients" => $ingredients, 
             "author" => $author,
-            "image" => $img
+            "image" => $img,
+            "favourite" => $favourite
         ]);
     }
 
@@ -114,9 +126,26 @@ class RecipeApiController extends Controller
         $recipeId = $req->recipeId;
 
         if(FavouriteRecipe::firstOrCreate(['userId'=>$userId, 'recipeId'=>$recipeId])){
-            return Response(["message" => "Pomyślnie dodano przepis do ulubionych"]);
+            return Response(["message" => "Successfully added to favourites"]);
         } else {
-            return Response(["message" => "Nie udało się dodać przepisu do ulubionych"]);
+            return Response(["message" => "Failed to add to favourites"]);
         }
+    }
+
+    public function removeFromFavourite(Request $req){
+        $userId = User::where('api_token', '=', $req->token)->first()->id;
+
+        if(FavouriteRecipe::where('userId', '=', $userId)->where('recipeId', '=', $req->recipeId)->forceDelete()){
+            return Response(["message" => "Successfully removed from favourites"]);
+        } else {
+            return Response(["message" => "Failed to remove from favourites"]);
+        }
+    }
+
+    public function getFavouriteRecipes(Request $req){
+        $userId = User::where('api_token', '=', $req->token)->first()->id;
+        $favIds = FavouriteRecipe::where('userId', '=', $userId)->get()->pluck('recipeId');
+
+        return Recipe::whereIn('recipeId', $favIds)->get();
     }
 }

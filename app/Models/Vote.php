@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Builder;
-use Traits\HasCompositePrimaryKeyTrait;
+use App\Traits\HasCompositePrimaryKeyTrait;
 
 class Vote extends Model
 {
@@ -19,6 +19,8 @@ class Vote extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'userId',
+        'recipeId',
         'vote',
     ];
 

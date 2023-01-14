@@ -48,14 +48,16 @@ class RecipeApiController extends Controller
                 }    
             }
             
-        Storage::put('images/' . $recipeId . '.txt', $req->image);
+        if ($req->image) {
+            Storage::put('images/' . $recipeId . '.txt', $req->image);
+        }
         });
 
         return Response(['message' => 'Successfully added new recipe']);
     }
 
     public function getAllRecipes(Request $req){
-        return Recipe::all()->toJson();
+        return Recipe::paginate(15);
     }
 
     public function getUserRecipes(Request $req){
@@ -144,7 +146,7 @@ class RecipeApiController extends Controller
 
     public function getFavouriteRecipes(Request $req){
         $userId = User::where('api_token', '=', $req->token)->first()->id;
-        $favIds = FavouriteRecipe::where('userId', '=', $userId)->get()->pluck('recipeId');
+        $favIds = FavouriteRecipe::where('userId', '=', $userId)->pluck('recipeId');
 
         return Recipe::whereIn('recipeId', $favIds)->get();
     }

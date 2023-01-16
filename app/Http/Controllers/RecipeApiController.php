@@ -57,7 +57,7 @@ class RecipeApiController extends Controller
     }
 
     public function getAllRecipes(Request $req){
-        return Recipe::paginate(15);
+        return Recipe::paginate(1);
     }
 
     public function getUserRecipes(Request $req){
@@ -149,5 +149,9 @@ class RecipeApiController extends Controller
         $favIds = FavouriteRecipe::where('userId', '=', $userId)->pluck('recipeId');
 
         return Recipe::whereIn('recipeId', $favIds)->get();
+    }
+
+    public function getRecipesSearch(Request $req){
+        return Recipe::where('name', 'LIKE', '%'.$req->searchString.'%')->paginate(1);
     }
 }

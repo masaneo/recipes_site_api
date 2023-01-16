@@ -45,11 +45,13 @@ Route::get('/recipes/getUserRecipes', [RecipeApiController::class, 'getUserRecip
 Route::post('/recipes/addToFavourite', [RecipeApiController::class, 'addRecipeToFavourite']);
 Route::delete('/recipes/removeFromFavourite', [RecipeApiController::class, 'removeFromFavourite']);
 Route::get('/recipes/getFavouriteRecipes', [RecipeApiController::class, 'getFavouriteRecipes']);
+Route::get('/recipes/searchRecipes', [RecipeApiController::class, 'getRecipesSearch']);
 
 //Vote routes
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);
 Route::get('/recipes/votes/getAverageVote', [VoteApiController::class, 'getAverageVote']);
 Route::get('/recipes/votes/getUserVote', [VoteApiController::class, 'getUserVote']);
+Route::get('/recipes/votes/highestVoted', [VoteApiController::class, 'getHighestVoted']);
 
 //Other routes
 Route::get('/recipes/units/getAllUnits', [UnitController::class, 'getAllUnits']);

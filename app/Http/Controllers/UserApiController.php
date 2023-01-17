@@ -27,12 +27,26 @@ class UserApiController extends Controller
      */
     public function store(Request $request)
     {
-        return User::create([
-            'username' => $request['username'],
-            'email' => $request['email'],
-            'password' => Hash::make($request['password']),
-            'api_token' => Str::random(60),
-        ]);
+        $message = "";
+        if(User::where('username', '=', $request['username'])->exists()){
+            $message .= "Podana nazwa użytkownika jest zajęta! ";
+        }
+        if(User::where('email', '=', $request['email'])->exists()){
+            $message .= "Podany adres e-mail jest zajęty! ";
+        }
+
+        if($message == "") {
+            return User::create([
+                'username' => $request['username'],
+                'email' => $request['email'],
+                'password' => Hash::make($request['password']),
+                'api_token' => Str::random(60),
+            ]);
+        } else {
+            return Response([
+                "message" => $message
+            ]);
+        }
     }
 
     /**
@@ -76,7 +90,7 @@ class UserApiController extends Controller
         $user = User::where('email', $request->email)->first();
         if(!$user || !Hash::check($request->password, $user->password)){
             return response([
-                'message' => ['Invalid email or password'],
+                'message' => 'Nieprawidłowy adres e-mail lub hasło',
             ]);
         }
 

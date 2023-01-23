@@ -10,6 +10,7 @@ use App\Models\Ingredient;
 use App\Models\RecipeCategory;
 use App\Models\FavouriteRecipe;
 use App\Models\User;
+use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +20,7 @@ class RecipeApiController extends Controller
         DB::transaction(function() use ($req){
             $id = User::where('api_token', '=', $req->token)->first()->id;
             
-            $recipeId = Recipe::insertGetId(['name' => $req->name, 'userId' => $id]);
+            $recipeId = Recipe::insertGetId(['name' => $req->name, 'userId' => $id, 'created_at' => now(), 'updated_at' => now()]);
 
             foreach($req->steps as $number => $step){
                 if($step['step'] !== null){
@@ -37,7 +38,7 @@ class RecipeApiController extends Controller
                     if($ing !== null) {
                         $ing = $ing->ingredientId;
                     } else {
-                        $ing = Ingredient::insertGetId(['name' => $ingredient['ingredient']]);
+                        $ing = Ingredient::insertGetId(['name' => $ingredient['ingredient'], 'created_at' => now(), 'updated_at' => now()]);
                     }
                     IngredientRecipe::create([
                         'ingredientId' => $ing, 
@@ -57,7 +58,7 @@ class RecipeApiController extends Controller
     }
 
     public function getAllRecipes(Request $req){
-        return Recipe::paginate(1);
+        return Recipe::paginate(12);
     }
 
     public function getUserRecipes(Request $req){
@@ -89,7 +90,7 @@ class RecipeApiController extends Controller
         ->join("ingredients_recipes", "ingredients.ingredientId", "=", "ingredients_recipes.ingredientId")
         ->join("units", "ingredients_recipes.unitId", "=", "units.id")
         ->get(); //joins ingredients and ingredients_recipes and returns ingredients name, id, recipeId, amount
-        
+        $category = RecipeCategory::where('recipeId', '=', $req->id)->first();
         $favourite = false;
 
         if($req->token){
@@ -110,7 +111,8 @@ class RecipeApiController extends Controller
             "ingredients" => $ingredients, 
             "author" => $author,
             "image" => $img,
-            "favourite" => $favourite
+            "favourite" => $favourite,
+            "category" => $category,
         ]);
     }
 
@@ -152,6 +154,115 @@ class RecipeApiController extends Controller
     }
 
     public function getRecipesSearch(Request $req){
-        return Recipe::where('name', 'LIKE', '%'.$req->searchString.'%')->paginate(1);
+        return Recipe::where('name', 'LIKE', '%'.$req->searchString.'%')->paginate(12);
     }
+    
+    public function findRecipesWithIngredients(Request $req){
+        $ingredients = $this->stringToArray($req->ingredientList);
+        // $ingredients = $this->get_array_combination($ingredients);
+        
+        $ids = Ingredient::whereIn('name', $ingredients)->pluck('ingredientId');
+
+        $recIds = IngredientRecipe::select('recipeId')->whereIn('ingredientId', $ids)->groupBy('recipeId')->pluck('recipeId');
+        $results = Recipe::whereIn('recipeId', $recIds)->get();
+
+        foreach($results as $result) {
+            $result['image'] = Storage::get('images/' . $result['recipeId'] . '.txt') ? Storage::get('images/' . $result['recipeId'] . '.txt') : Storage::get('images/no_image_available.txt');
+        }
+
+        return $results;
+    }
+
+    function stringToArray($stringSeperatedCommas){
+        return collect(explode(',', $stringSeperatedCommas))->map(function ($string) {
+            return trim($string) != null ? trim($string) : null;
+        })->filter(function ($string) {
+            return trim($string) != null;
+        });
+    }
+
+    // function get_array_combination($arr) {
+    //     $results = array(array());
+    
+    //     foreach ($arr as $values)
+    //         foreach ($results as $combination)
+    //                 array_push($results, array_merge($combination, array($values))); // Get new values and merge to your previous combination. And push it to your results array
+        
+        
+    //      usort($results, function($a, $b) {
+    //         return count($b) - count($a);
+    //      });
+
+    //      return $results;
+    // }
+
+    public function getAllIngredientsByRecipeId(Request $req) {
+        $result = IngredientRecipe::select('ingredients.ingredientId', 'ingredients.name', 'ingredients_recipes.amount', 'units.name as unit')
+        ->join('ingredients', 'ingredients_recipes.ingredientId', '=', 'ingredients.ingredientId')
+        ->join('units', 'ingredients_recipes.unitId', '=', 'units.id')
+        ->where('ingredients_recipes.recipeId', '=', $req->recipeId)->get();
+
+        return $result;
+    }
+
+    public function getRecipeDataToEdit(Request $req) {
+        $recipe =  Recipe::where('recipeId', '=', $req->id)->first();
+        $user = User::where('api_token', '=', $req->token)->first();
+
+        if($recipe->userId == $user->id){
+            $result = $this->getSingleRecipe($req);
+            return $result;
+        } else {
+            return Response(["message" => "nie zgadza się"]);
+        }
+    }
+
+    public function updateRecipe(Request $req) {
+        $recipe = Recipe::where('recipeId', '=', $req->id)->first();
+        $user = User::where('api_token', '=', $req->token)->first();
+
+        if($recipe->userId == $user->id){
+            if($recipe->name != $req->name){
+                $recipe->name = $req->name;
+                $recipe->save();
+            }
+            foreach($req->steps as $step){
+                if($step['step'] !== null) {
+                    CookingStep::updateOrCreate([
+                        'stepId' => $step['id'],
+                        'recipeId' => $req->id
+                    ],['step' => $step['step']]);
+                }
+            }
+            foreach($req->ingredients as $ingredient){
+                if($ingredient !== null && $ingredient['ingredient'] !== null){
+                    $ing = Ingredient::where('name', '=', $ingredient['ingredient'])->first();
+                    if($ing !== null) {
+                        $ing = $ing->ingredientId;
+                    } else {
+                        $ing = Ingredient::insertGetId(['name' => $ingredient['ingredient'], 'created_at' => now(), 'updated_at' => now()]);
+                    }
+                    $unit = Unit::where('name', '=', $ingredient['unit'])->first();
+                    IngredientRecipe::updateOrCreate([
+                        'ingredientId' => $ing, 
+                        'recipeId' => $recipe->recipeId
+                    ],[
+                        'amount' => $ingredient['quantity'], 
+                        'unitId' => $unit->id
+                    ]);
+                }    
+            }
+            foreach($req->categories as $category){
+                if($category['categoryId'] !== null){
+                    RecipeCategory::updateOrCreate(['categoryId' => $category['categoryId'], 'recipeId' => $recipe->recipeId]);
+                }
+            }
+            if ($req->image) {
+                Storage::put('images/' . $recipeId . '.txt', $req->image);
+            }
+        } else {
+            return Response(['message' => 'Coś poszło nie tak.']);
+        }
+    }
+
 }

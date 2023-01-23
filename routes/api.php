@@ -46,6 +46,10 @@ Route::post('/recipes/addToFavourite', [RecipeApiController::class, 'addRecipeTo
 Route::delete('/recipes/removeFromFavourite', [RecipeApiController::class, 'removeFromFavourite']);
 Route::get('/recipes/getFavouriteRecipes', [RecipeApiController::class, 'getFavouriteRecipes']);
 Route::get('/recipes/searchRecipes', [RecipeApiController::class, 'getRecipesSearch']);
+Route::get('/recipes/findRecipes', [RecipeApiController::class, 'findRecipesWithIngredients']);
+Route::get('/recipes/getIngredientsByRecipeId', [RecipeApiController::class, 'getAllIngredientsByRecipeId']);
+Route::get('/recipes/getRecipeData', [RecipeApiController::class, 'getRecipeDataToEdit']);
+Route::put('/recipes/modifyRecipe', [RecipeApiController::class, 'updateRecipe']);
 
 //Vote routes
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);

@@ -50,6 +50,9 @@ Route::get('/recipes/findRecipes', [RecipeApiController::class, 'findRecipesWith
 Route::get('/recipes/getIngredientsByRecipeId', [RecipeApiController::class, 'getAllIngredientsByRecipeId']);
 Route::get('/recipes/getRecipeData', [RecipeApiController::class, 'getRecipeDataToEdit']);
 Route::put('/recipes/modifyRecipe', [RecipeApiController::class, 'updateRecipe']);
+Route::delete('/recipes/editRecipe/deleteIngredient', [RecipeApiController::class, 'deleteIngredientFromRecipe']);
+Route::delete('/recipes/editRecipe/deleteStep', [RecipeApiController::class, 'deleteStepFromRecipe']);
+Route::delete('/recipes/editRecipe/deleteRecipe', [RecipeApiController::class, 'deleteRecipe']);
 
 //Vote routes
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);

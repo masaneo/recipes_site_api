@@ -265,4 +265,51 @@ class RecipeApiController extends Controller
         }
     }
 
+    public function deleteIngredientFromRecipe(Request $req){
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+
+        if($user->id === $recipe->userId){
+            $ingredientRecipe = IngredientRecipe::where('recipeId', '=', $req->recipeId)->where('ingredientId', '=', $req->ingredientId)->first();
+            if($ingredientRecipe) {
+                $ingredientRecipe->forceDelete();
+                return Response(["message" => "Usunięto"]);
+            } else {
+                return Response(["message" => "Nie znaleziono takiego składnika w bazie"]);
+            }
+        }
+    }
+
+    public function deleteStepFromRecipe(Request $req){
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+
+        if($user->id === $recipe->userId){
+            $cookingStep = CookingStep::where('recipeId', '=', $req->recipeId)->where('stepId', '=', $req->stepId)->first();
+            if($cookingStep) {
+                $cookingStep->forceDelete();
+                return Response(["message" => "Usunięto"]);
+            } else {
+                return Response(["message" => "Nie znaleziono takiego kroku w bazie"]);
+            }
+        }
+    }
+
+    public function deleteRecipe(Request $req) {
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+
+        if($user->id === $recipe->userId){
+            Recipe::where('recipeId', '=', $req->recipeId)->forceDelete();
+            IngredientRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
+            CookingStep::where('recipeId', '=', $req->recipeId)->forceDelete();
+            RecipeCategory::where('recipeId', '=', $req->recipeId)->forceDelete();
+            FavouriteRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
+            Vote::where('recipeId', '=', $req->recipeId)->forceDelete();
+
+            return Response(["message" => "Usunięto przepis"]);
+        } else {
+            return Response(["message" => "Nie znaleziono przepisu"]);
+        }
+    }
 }

@@ -11,6 +11,7 @@ use App\Models\RecipeCategory;
 use App\Models\FavouriteRecipe;
 use App\Models\User;
 use App\Models\Unit;
+use App\Models\Vote;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -258,7 +259,8 @@ class RecipeApiController extends Controller
                 }
             }
             if ($req->image) {
-                Storage::put('images/' . $recipeId . '.txt', $req->image);
+                return $req;
+                Storage::put('images/' . $req->recipeId . '.txt', $req->image);
             }
         } else {
             return Response(['message' => 'Coś poszło nie tak.']);

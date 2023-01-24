@@ -41,6 +41,7 @@ class UserApiController extends Controller
                 'email' => $request['email'],
                 'password' => Hash::make($request['password']),
                 'api_token' => Str::random(60),
+                'user_type' => 0,
             ]);
         } else {
             return Response([

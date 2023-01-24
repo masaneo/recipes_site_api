@@ -259,7 +259,6 @@ class RecipeApiController extends Controller
                 }
             }
             if ($req->image) {
-                return $req;
                 Storage::put('images/' . $req->recipeId . '.txt', $req->image);
             }
         } else {

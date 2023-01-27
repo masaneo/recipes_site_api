@@ -12,6 +12,7 @@ use App\Models\FavouriteRecipe;
 use App\Models\User;
 use App\Models\Unit;
 use App\Models\Vote;
+use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -67,7 +68,7 @@ class RecipeApiController extends Controller
 
         $userId = User::where('api_token', '=', $token)->first()->id;
 
-        return Recipe::where('userId', '=', $userId)->get();
+        return Recipe::where('userId', '=', $userId)->paginate(12);
     }
 
     public function getSingleRecipe(Request $req){
@@ -151,7 +152,7 @@ class RecipeApiController extends Controller
         $userId = User::where('api_token', '=', $req->token)->first()->id;
         $favIds = FavouriteRecipe::where('userId', '=', $userId)->pluck('recipeId');
 
-        return Recipe::whereIn('recipeId', $favIds)->get();
+        return Recipe::whereIn('recipeId', $favIds)->paginate(12);
     }
 
     public function getRecipesSearch(Request $req){
@@ -312,5 +313,12 @@ class RecipeApiController extends Controller
         } else {
             return Response(["message" => "Nie znaleziono przepisu"]);
         }
+    }
+    public function getRecipesByCategory(Request $req) {
+        $recipes = RecipeCategory::where('categoryId', '=', $req->categoryId)->pluck('recipeId');
+        return Response([
+            "recipes" => Recipe::whereIn('recipeId', $recipes)->paginate(12),
+            "categoryName" => Category::where("categoryId", '=', $req->categoryId)->pluck('name')
+        ]);
     }
 }

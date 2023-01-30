@@ -96,9 +96,11 @@ class UserApiController extends Controller
         }
 
         $token = $user->api_token;
+        $admin = $user->user_type == 1 ? true : false;
 
         $response = [
             'user' => $user,
+            'admin' => $admin,
             'token' => $token
         ];
 

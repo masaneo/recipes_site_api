@@ -245,6 +245,10 @@ class RecipeApiController extends Controller
                         $ing = Ingredient::insertGetId(['name' => $ingredient['ingredient'], 'created_at' => now(), 'updated_at' => now()]);
                     }
                     $unit = Unit::where('name', '=', $ingredient['unit'])->first();
+                    if($ingredient['id'] != $ing) {
+                        $delIng = IngredientRecipe::where('ingredientId', '=', $ingredient['id'])->where('recipeId', '=', $recipe->recipeId)->first();
+                        $delIng->forceDelete();
+                    }
                     IngredientRecipe::updateOrCreate([
                         'ingredientId' => $ing, 
                         'recipeId' => $recipe->recipeId
@@ -314,11 +318,144 @@ class RecipeApiController extends Controller
             return Response(["message" => "Nie znaleziono przepisu"]);
         }
     }
+
     public function getRecipesByCategory(Request $req) {
         $recipes = RecipeCategory::where('categoryId', '=', $req->categoryId)->pluck('recipeId');
         return Response([
             "recipes" => Recipe::whereIn('recipeId', $recipes)->paginate(12),
             "categoryName" => Category::where("categoryId", '=', $req->categoryId)->pluck('name')
         ]);
+    }
+
+    public function getRecipesForAdmin(Request $req) {
+        $user = User::where("api_token", '=', $req->token)->first();
+        $recipes = [];
+        $isAdmin = $user->user_type == 1 ? true : false;
+
+        if($isAdmin) {
+            $recipes = Recipe::orderByDesc("updated_at")->paginate(12);
+        }
+
+        return Response([
+            "isAdmin" => $isAdmin,
+            "recipes" => $recipes,
+        ]);
+    }
+
+    public function getRecipeDataAdmin(Request $req) {
+        $user = User::where("api_token", '=', $req->token)->first();
+        $isAdmin = $user->user_type == 1 ? true : false;
+
+        if($isAdmin) {
+            $result = $this->getSingleRecipe($req);
+            return $result;
+        } else {
+            return Response(["message" => "nie zgadza się"]);
+        }
+    }
+
+    public function updateRecipeAdmin(Request $req) {
+        
+        $recipe = Recipe::where('recipeId', '=', $req->id)->first();
+        $user = User::where('api_token', '=', $req->token)->first();
+        $isAdmin = $user->user_type == 1 ? true : false;
+
+        if($isAdmin){
+            if($recipe->name != $req->name){
+                $recipe->name = $req->name;
+                $recipe->save();
+            }
+            foreach($req->steps as $step){
+                if($step['step'] !== null) {
+                    CookingStep::updateOrCreate([
+                        'stepId' => $step['id'],
+                        'recipeId' => $req->id
+                    ],['step' => $step['step']]);
+                }
+            }
+            foreach($req->ingredients as $ingredient){
+                if($ingredient !== null && $ingredient['ingredient'] !== null){
+                    $ing = Ingredient::where('name', '=', $ingredient['ingredient'])->first();
+                    if($ing !== null) {
+                        $ing = $ing->ingredientId;
+                    } else {
+                        $ing = Ingredient::insertGetId(['name' => $ingredient['ingredient'], 'created_at' => now(), 'updated_at' => now()]);
+                    }
+                    $unit = Unit::where('name', '=', $ingredient['unit'])->first();
+                    if($ingredient['id'] != $ing) {
+                        $delIng = IngredientRecipe::where('ingredientId', '=', $ingredient['id'])->where('recipeId', '=', $recipe->recipeId)->first();
+                        $delIng->forceDelete();
+                    }
+                    IngredientRecipe::updateOrCreate([
+                        'ingredientId' => $ing, 
+                        'recipeId' => $recipe->recipeId
+                    ],[
+                        'amount' => $ingredient['quantity'], 
+                        'unitId' => $unit->id
+                    ]);
+                }    
+            }
+            foreach($req->categories as $category){
+                if($category['categoryId'] !== null){
+                    RecipeCategory::updateOrCreate(['categoryId' => $category['categoryId'], 'recipeId' => $recipe->recipeId]);
+                }
+            }
+            if ($req->image) {
+                Storage::put('images/' . $req->recipeId . '.txt', $req->image);
+            }
+        } else {
+            return Response(['message' => 'Coś poszło nie tak.']);
+        }
+    }
+
+    public function deleteIngredientFromRecipeAdmin(Request $req){
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+        $isAdmin = $user->user_type == 1 ? true : false;
+
+        if($isAdmin){
+            $ingredientRecipe = IngredientRecipe::where('recipeId', '=', $req->recipeId)->where('ingredientId', '=', $req->ingredientId)->first();
+            if($ingredientRecipe) {
+                $ingredientRecipe->forceDelete();
+                return Response(["message" => "Usunięto"]);
+            } else {
+                return Response(["message" => "Nie znaleziono takiego składnika w bazie"]);
+            }
+        }
+    }
+
+    public function deleteStepFromRecipeAdmin(Request $req){
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+        $isAdmin = $user->user_type == 1 ? true : false;
+
+        if($isAdmin){
+            $cookingStep = CookingStep::where('recipeId', '=', $req->recipeId)->where('stepId', '=', $req->stepId)->first();
+            if($cookingStep) {
+                $cookingStep->forceDelete();
+                return Response(["message" => "Usunięto"]);
+            } else {
+                return Response(["message" => "Nie znaleziono takiego kroku w bazie"]);
+            }
+        }
+    }
+
+    public function deleteRecipeAdmin(Request $req) {
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+        $isAdmin = $user->user_type == 1 ? true : false;
+
+        if($isAdmin){
+            Recipe::where('recipeId', '=', $req->recipeId)->forceDelete();
+            IngredientRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
+            CookingStep::where('recipeId', '=', $req->recipeId)->forceDelete();
+            RecipeCategory::where('recipeId', '=', $req->recipeId)->forceDelete();
+            FavouriteRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
+            Vote::where('recipeId', '=', $req->recipeId)->forceDelete();
+
+            return Response(["message" => "Usunięto przepis"]);
+        } else {
+            return Response(["message" => "Nie znaleziono przepisu"]);
+        }
     }
 }

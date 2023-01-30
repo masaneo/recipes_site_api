@@ -224,6 +224,8 @@ class RecipeApiController extends Controller
         $user = User::where('api_token', '=', $req->token)->first();
 
         if($recipe->userId == $user->id){
+            $recipe->updated_at = now();
+            $recipe->save();
             if($recipe->name != $req->name){
                 $recipe->name = $req->name;
                 $recipe->save();
@@ -276,6 +278,8 @@ class RecipeApiController extends Controller
         $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
 
         if($user->id === $recipe->userId){
+            $recipe->updated_at = now();
+            $recipe->save();
             $ingredientRecipe = IngredientRecipe::where('recipeId', '=', $req->recipeId)->where('ingredientId', '=', $req->ingredientId)->first();
             if($ingredientRecipe) {
                 $ingredientRecipe->forceDelete();
@@ -291,6 +295,8 @@ class RecipeApiController extends Controller
         $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
 
         if($user->id === $recipe->userId){
+            $recipe->updated_at = now();
+            $recipe->save();
             $cookingStep = CookingStep::where('recipeId', '=', $req->recipeId)->where('stepId', '=', $req->stepId)->first();
             if($cookingStep) {
                 $cookingStep->forceDelete();
@@ -361,6 +367,8 @@ class RecipeApiController extends Controller
         $isAdmin = $user->user_type == 1 ? true : false;
 
         if($isAdmin){
+            $recipe->updated_at = now();
+            $recipe->save();
             if($recipe->name != $req->name){
                 $recipe->name = $req->name;
                 $recipe->save();
@@ -414,6 +422,8 @@ class RecipeApiController extends Controller
         $isAdmin = $user->user_type == 1 ? true : false;
 
         if($isAdmin){
+            $recipe->updated_at = now();
+            $recipe->save();
             $ingredientRecipe = IngredientRecipe::where('recipeId', '=', $req->recipeId)->where('ingredientId', '=', $req->ingredientId)->first();
             if($ingredientRecipe) {
                 $ingredientRecipe->forceDelete();
@@ -430,6 +440,8 @@ class RecipeApiController extends Controller
         $isAdmin = $user->user_type == 1 ? true : false;
 
         if($isAdmin){
+            $recipe->updated_at = now();
+            $recipe->save();
             $cookingStep = CookingStep::where('recipeId', '=', $req->recipeId)->where('stepId', '=', $req->stepId)->first();
             if($cookingStep) {
                 $cookingStep->forceDelete();

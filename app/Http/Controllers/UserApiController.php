@@ -6,8 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
+use Mail;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
 
-class UserApiController extends Controller
+class UserApiController extends Controller 
 {
     /**
      * Display a listing of the resource.
@@ -36,13 +40,20 @@ class UserApiController extends Controller
         }
 
         if($message == "") {
-            return User::create([
+            $user = User::create([
                 'username' => $request['username'],
                 'email' => $request['email'],
                 'password' => Hash::make($request['password']),
                 'api_token' => Str::random(60),
                 'user_type' => 0,
             ]);
+
+            if($user) {
+                $this->sendVerificationEmail($user->email, $user->api_token, $user->username);
+            }
+
+            return $user;
+
         } else {
             return Response([
                 "message" => $message
@@ -89,6 +100,11 @@ class UserApiController extends Controller
     public function login(Request $request)
     {
         $user = User::where('email', $request->email)->first();
+
+        if($user->email_verified_at == null) {
+            return Response(["message" => "Adres e-mail nie został potwierdzony, sprawdź ponownie skrzynkę pocztową."]);
+        }
+
         if(!$user || !Hash::check($request->password, $user->password)){
             return response([
                 'message' => 'Nieprawidłowy adres e-mail lub hasło',
@@ -105,5 +121,43 @@ class UserApiController extends Controller
         ];
 
         return response($response, 201);
+    }
+
+    public function sendVerificationEmail($email, $token, $username) {
+        $host_url = "localhost:8080";
+        $user = User::where('email', '=', $email)->get();
+
+        if(count($user) > 0) {
+            $data['email'] = $email;
+            $data['title'] = "Weryfikacja adresu e-mail";
+            $data['body'] = "Witaj, założyłeś konto w serwisie przepisowo. Aby z niego skorzystać musisz zweryfikować swój adres e-mail! Aby to uczynić kliknij w link poniżej";
+            $data['url'] = "http://".$host_url."/verify?token=".$token;
+
+            Mail::send('verifyMail', ['data' => $data], function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+            });
+        }
+    }
+
+    public function verifyEmail(Request $req) {
+        $user = User::where('api_token', '=', $req->token)->first();
+
+        if($user->email_verified_at != null) {
+            return Response(["message" => "Twój adres email jest już zweryfikowany."]);
+        }
+
+        if($user) { 
+            $user->email_verified_at = now();
+
+            $user->save();
+
+            return Response(["message" => "Pomyślnie zweryfikowano adres email."]);
+        } 
+    }
+
+    public function resendVerificationEmail(Request $req) {
+        $user = User::where('email', '=', $req->email)->first();
+
+        $this->sendVerificationEmail($user->email, $user->api_token, $user->username);
     }
 }

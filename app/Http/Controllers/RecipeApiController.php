@@ -15,6 +15,7 @@ use App\Models\Vote;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Mail;
 
 class RecipeApiController extends Controller
 {
@@ -469,5 +470,27 @@ class RecipeApiController extends Controller
         } else {
             return Response(["message" => "Nie znaleziono przepisu"]);
         }
+    }
+
+    public function sendChangeSuggestion(Request $req) {
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+        $user = User::where('id', '=', $recipe->userId)->first();
+        $admin = User::where('api_token', '=', $req->token)->first();
+        if($admin->user_type == 1) {
+            if($user) {
+                $data['email'] = $user->email;
+                $data['title'] = "Sugerowane zmiany w przepisie";
+                $data['username'] = $user->username;
+                $data['recipeName'] = $recipe->name;
+                $data['suggestions'] = $req->suggestions;
+    
+                Mail::send('suggestionsMail', ['data' => $data], function($message) use ($data){
+                    $message->to($data['email'])->subject($data['title']);
+                });
+            }
+        } else {
+            return Response(["message" => "Autoryzacja nie powiodła się"]);
+        }
+        
     }
 }

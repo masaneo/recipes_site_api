@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryApiController;
 use App\Http\Controllers\RecipeApiController;
 use App\Http\Controllers\VoteApiController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\EmailVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +27,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 //User routes
 Route::resource('/users', UserApiController::class);
-Route::post('/users/auth', [UserApiController::class, 'login']);
+Route::post('/users/auth', [UserApiController::class, 'login'])->name('login');
+Route::post('/users/email/verification', [UserApiController::class, 'verifyEmail']);
+Route::post('/users/email/resendVerification', [UserApiController::class, 'resendVerificationEmail']);
 
 //Ingredients routes
 Route::post('/recipes/ingredients/addIngredient', [IngredientApiController::class, 'addIngredient']);
@@ -60,6 +63,7 @@ Route::put('/recipes/admin/modifyRecipe', [RecipeApiController::class, 'updateRe
 Route::delete('/recipes/admin/editRecipe/deleteIngredient', [RecipeApiController::class, 'deleteIngredientFromRecipeAdmin']);
 Route::delete('/recipes/admin/editRecipe/deleteStep', [RecipeApiController::class, 'deleteStepFromRecipeAdmin']);
 Route::delete('/recipes/admin/editRecipe/deleteRecipe', [RecipeApiController::class, 'deleteRecipeAdmin']);
+Route::post('/recipes/admin/editRecipe/sendChangeSuggestion', [RecipeApiController::class, 'sendChangeSuggestion']);
 
 //Vote routes
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);

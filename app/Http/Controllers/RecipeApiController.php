@@ -493,4 +493,10 @@ class RecipeApiController extends Controller
         }
         
     }
+
+    public function getNewestRecipes(Request $req){
+        $recipes = Recipe::orderByDesc('created_at')->get()->take(4);
+        
+        return $recipes;
+    }
 }

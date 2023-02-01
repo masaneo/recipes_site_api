@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\UserType;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
@@ -45,7 +46,7 @@ class UserApiController extends Controller
                 'email' => $request['email'],
                 'password' => Hash::make($request['password']),
                 'api_token' => Str::random(60),
-                'user_type' => 0,
+                'user_type' => UserType::where('name', '=', 'user')->first()->id,
             ]);
 
             if($user) {
@@ -112,7 +113,7 @@ class UserApiController extends Controller
         }
 
         $token = $user->api_token;
-        $admin = $user->user_type == 1 ? true : false;
+        $admin = $user->user_type == UserType::where('name', '=', 'admin')->first()->id ? true : false;
 
         $response = [
             'user' => $user,

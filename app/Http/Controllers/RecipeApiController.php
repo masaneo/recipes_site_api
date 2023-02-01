@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Unit;
 use App\Models\Vote;
 use App\Models\Category;
+use App\Models\UserType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Mail;
@@ -61,7 +62,7 @@ class RecipeApiController extends Controller
     }
 
     public function getAllRecipes(Request $req){
-        return Recipe::paginate(12);
+        return Recipe::where('is_visible', '=', true)->paginate(12);
     }
 
     public function getUserRecipes(Request $req){
@@ -157,7 +158,7 @@ class RecipeApiController extends Controller
     }
 
     public function getRecipesSearch(Request $req){
-        return Recipe::where('name', 'LIKE', '%'.$req->searchString.'%')->paginate(12);
+        return Recipe::where('is_visible', '=', true)->where('name', 'LIKE', '%'.$req->searchString.'%')->paginate(12);
     }
     
     public function findRecipesWithIngredients(Request $req){
@@ -329,7 +330,7 @@ class RecipeApiController extends Controller
     public function getRecipesByCategory(Request $req) {
         $recipes = RecipeCategory::where('categoryId', '=', $req->categoryId)->pluck('recipeId');
         return Response([
-            "recipes" => Recipe::whereIn('recipeId', $recipes)->paginate(12),
+            "recipes" => Recipe::where('is_visible', '=', true)->whereIn('recipeId', $recipes)->paginate(12),
             "categoryName" => Category::where("categoryId", '=', $req->categoryId)->pluck('name')
         ]);
     }
@@ -337,7 +338,7 @@ class RecipeApiController extends Controller
     public function getRecipesForAdmin(Request $req) {
         $user = User::where("api_token", '=', $req->token)->first();
         $recipes = [];
-        $isAdmin = $user->user_type == 1 ? true : false;
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin) {
             $recipes = Recipe::orderByDesc("updated_at")->paginate(12);
@@ -351,7 +352,7 @@ class RecipeApiController extends Controller
 
     public function getRecipeDataAdmin(Request $req) {
         $user = User::where("api_token", '=', $req->token)->first();
-        $isAdmin = $user->user_type == 1 ? true : false;
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin) {
             $result = $this->getSingleRecipe($req);
@@ -365,7 +366,7 @@ class RecipeApiController extends Controller
         
         $recipe = Recipe::where('recipeId', '=', $req->id)->first();
         $user = User::where('api_token', '=', $req->token)->first();
-        $isAdmin = $user->user_type == 1 ? true : false;
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin){
             $recipe->updated_at = now();
@@ -420,7 +421,7 @@ class RecipeApiController extends Controller
     public function deleteIngredientFromRecipeAdmin(Request $req){
         $user = User::where('api_token', '=', $req->token)->first();
         $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
-        $isAdmin = $user->user_type == 1 ? true : false;
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin){
             $recipe->updated_at = now();
@@ -438,7 +439,7 @@ class RecipeApiController extends Controller
     public function deleteStepFromRecipeAdmin(Request $req){
         $user = User::where('api_token', '=', $req->token)->first();
         $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
-        $isAdmin = $user->user_type == 1 ? true : false;
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin){
             $recipe->updated_at = now();
@@ -456,15 +457,24 @@ class RecipeApiController extends Controller
     public function deleteRecipeAdmin(Request $req) {
         $user = User::where('api_token', '=', $req->token)->first();
         $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
-        $isAdmin = $user->user_type == 1 ? true : false;
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin){
-            Recipe::where('recipeId', '=', $req->recipeId)->forceDelete();
-            IngredientRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
-            CookingStep::where('recipeId', '=', $req->recipeId)->forceDelete();
-            RecipeCategory::where('recipeId', '=', $req->recipeId)->forceDelete();
-            FavouriteRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
-            Vote::where('recipeId', '=', $req->recipeId)->forceDelete();
+            $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+            $recipe->is_visible = 0;
+            $recipe->save();
+
+            $recipeOwner = User::where('id', '=', $recipe->userId)->first();
+
+            $data['email'] = $recipeOwner->email;
+            $data['title'] = "Zmieniono widoczność przepisu";
+            $data['username'] = $recipeOwner->username;
+            $data['recipeName'] = $recipe->name;
+            $data['suggestions'] = $req->suggestions;
+
+            Mail::send('hiddenRecipeMail', ['data' => $data], function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+            });
 
             return Response(["message" => "Usunięto przepis"]);
         } else {
@@ -476,7 +486,7 @@ class RecipeApiController extends Controller
         $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
         $user = User::where('id', '=', $recipe->userId)->first();
         $admin = User::where('api_token', '=', $req->token)->first();
-        if($admin->user_type == 1) {
+        if($admin->user_type == $this->getUserTypeAdminId()) {
             if($user) {
                 $data['email'] = $user->email;
                 $data['title'] = "Sugerowane zmiany w przepisie";
@@ -498,5 +508,37 @@ class RecipeApiController extends Controller
         $recipes = Recipe::orderByDesc('created_at')->get()->take(4);
         
         return $recipes;
+    }
+
+    public function getUserTypeAdminId(){
+        return UserType::where('name', '=', 'admin')->first()->id;
+    }
+
+    public function acceptChangesAdmin(Request $req){
+        $user = User::where('api_token', '=', $req->token)->first();
+        $recipe = Recipe::where('recipeId', '=', $req->recipeId)->first();
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
+
+        if($isAdmin) {
+            $recipe->is_visible = true;
+            $recipe->save();
+            
+            $recipeOwner = User::where('id', '=', $recipe->userId)->first();
+
+            $data['email'] = $recipeOwner->email;
+            $data['title'] = "Zaakceptowano poprawki";
+            $data['username'] = $recipeOwner->username;
+            $data['recipeName'] = $recipe->name;
+
+            Mail::send('acceptedChangesMail', ['data' => $data], function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+            });
+
+            return Response(["message" => "Zmieniono widoczność przepisu"]);
+        }
+
+        return Response(["message" => "Operacja nie powiodła się"]);
+
+
     }
 }

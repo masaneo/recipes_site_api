@@ -154,7 +154,7 @@ class RecipeApiController extends Controller
         $userId = User::where('api_token', '=', $req->token)->first()->id;
         $favIds = FavouriteRecipe::where('userId', '=', $userId)->pluck('recipeId');
 
-        return Recipe::whereIn('recipeId', $favIds)->paginate(12);
+        return Recipe::whereIn('recipeId', $favIds)->paginate(4);
     }
 
     public function getRecipesSearch(Request $req){
@@ -341,7 +341,22 @@ class RecipeApiController extends Controller
         $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
 
         if($isAdmin) {
-            $recipes = Recipe::orderByDesc("updated_at")->paginate(12);
+            $recipes = Recipe::where("is_visible", "=", true)->orderByDesc("updated_at")->paginate(4);
+        }
+
+        return Response([
+            "isAdmin" => $isAdmin,
+            "recipes" => $recipes,
+        ]);
+    }
+
+    public function getHiddenRecipesForAdmin(Request $req) {
+        $user = User::where("api_token", '=', $req->token)->first();
+        $recipes = [];
+        $isAdmin = $user->user_type == $this->getUserTypeAdminId() ? true : false;
+
+        if($isAdmin) {
+            $recipes = Recipe::where("is_visible", "=", false)->orderByDesc("updated_at")->paginate(4);
         }
 
         return Response([

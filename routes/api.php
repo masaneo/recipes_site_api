@@ -58,6 +58,7 @@ Route::delete('/recipes/editRecipe/deleteStep', [RecipeApiController::class, 'de
 Route::delete('/recipes/editRecipe/deleteRecipe', [RecipeApiController::class, 'deleteRecipe']);
 Route::get('/recipes/getRecipesByCategory', [RecipeApiController::class, 'getRecipesByCategory']);
 Route::get('/recipes/admin/getAllRecipes', [RecipeApiController::class, 'getRecipesForAdmin']);
+Route::get('/recipes/admin/getHiddenRecipes', [RecipeApiController::class, 'getHiddenRecipesForAdmin']);
 Route::get('/recipes/admin/getRecipeData', [RecipeApiController::class, 'getRecipeDataAdmin']);
 Route::put('/recipes/admin/modifyRecipe', [RecipeApiController::class, 'updateRecipeAdmin']);
 Route::delete('/recipes/admin/editRecipe/deleteIngredient', [RecipeApiController::class, 'deleteIngredientFromRecipeAdmin']);

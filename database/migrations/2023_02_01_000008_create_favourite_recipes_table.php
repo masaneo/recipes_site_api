@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('votes', function (Blueprint $table) {
-            $table->integer("userId");
-            $table->integer("recipeId");
-            $table->float("vote");
+        Schema::create('favourite_recipes', function (Blueprint $table) {
+            $table->id("favouriteId");
+            $table->foreignId("userId")->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId("recipeId")->references('recipeId')->on('recipes')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
-
-            $table->primary(['userId', 'recipeId']);
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('votes');
+        Schema::dropIfExists('favourite_recipes');
     }
 };

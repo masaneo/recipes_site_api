@@ -315,11 +315,6 @@ class RecipeApiController extends Controller
 
         if($user->id === $recipe->userId){
             Recipe::where('recipeId', '=', $req->recipeId)->forceDelete();
-            IngredientRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
-            CookingStep::where('recipeId', '=', $req->recipeId)->forceDelete();
-            RecipeCategory::where('recipeId', '=', $req->recipeId)->forceDelete();
-            FavouriteRecipe::where('recipeId', '=', $req->recipeId)->forceDelete();
-            Vote::where('recipeId', '=', $req->recipeId)->forceDelete();
 
             return Response(["message" => "Usunięto przepis"]);
         } else {
@@ -520,7 +515,7 @@ class RecipeApiController extends Controller
     }
 
     public function getNewestRecipes(Request $req){
-        $recipes = Recipe::orderByDesc('created_at')->get()->take(4);
+        $recipes = Recipe::where("is_visible", '=', true)->orderByDesc('created_at')->get()->take(4);
         
         return $recipes;
     }

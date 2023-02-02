@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('cooking_steps', function (Blueprint $table) {
-            $table->integer("stepId");
-            $table->integer("recipeId");
+            $table->unsignedBigInteger("stepId");
+            $table->foreignId("recipeId")->references('recipeId')->on('recipes')->onUpdate('cascade')->onDelete('cascade');
             $table->string("step");
             $table->timestamps();
 

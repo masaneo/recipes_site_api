@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('favourite_recipes', function (Blueprint $table) {
-            $table->id("favouriteId");
-            $table->integer("userId");
-            $table->integer("recipeID");
+        Schema::create('recipes', function (Blueprint $table) {
+            $table->id("recipeId");
+            $table->string("name");
+            $table->boolean("is_visible")->default(true);
+            $table->foreignId('userId')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('favourite_recipes');
+        Schema::dropIfExists('recipes');
     }
 };

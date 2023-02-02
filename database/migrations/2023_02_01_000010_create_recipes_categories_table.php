@@ -13,14 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ingredients_recipes', function (Blueprint $table) {
-            $table->integer("ingredientId");
-            $table->integer("recipeId");
-            $table->string("amount");
-            $table->integer("unitId");
+        Schema::create('recipes_categories', function (Blueprint $table) {
+            $table->foreignId("categoryId")->references('categoryId')->on('categories')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId("recipeId")->references('recipeId')->on('recipes')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
 
-            $table->primary(['ingredientId', 'recipeId']);
+            $table->primary(['categoryId', 'recipeId']);
         });
     }
 
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ingredients_recipes');
+        Schema::dropIfExists('recipes_categories');
     }
 };

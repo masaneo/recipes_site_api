@@ -21,7 +21,7 @@ use Mail;
 class RecipeApiController extends Controller
 {
     public function addRecipe(Request $req){
-        DB::transaction(function() use ($req){
+        $result = DB::transaction(function() use ($req){
             $id = User::where('api_token', '=', $req->token)->first()->id;
             
             $recipeId = Recipe::insertGetId(['name' => $req->name, 'userId' => $id, 'created_at' => now(), 'updated_at' => now()]);
@@ -56,9 +56,11 @@ class RecipeApiController extends Controller
         if ($req->image) {
             Storage::put('images/' . $recipeId . '.txt', $req->image);
         }
+
+        return $recipeId;
         });
 
-        return Response(['message' => 'Successfully added new recipe']);
+        return Response(['message' => 'Successfully added new recipe', "recipeId" => $result]);
     }
 
     public function getAllRecipes(Request $req){

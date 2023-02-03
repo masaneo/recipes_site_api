@@ -550,7 +550,20 @@ class RecipeApiController extends Controller
         }
 
         return Response(["message" => "Operacja nie powiodła się"]);
+    }
 
+    public function sendShoppingListToEmail(Request $req) {
+        $user = User::where('api_token', '=', $req->token)->first();
 
+        if($user) {
+            $data['email'] = $user->email;
+            $data['title'] = "Lista zakupów";
+            $data['username'] = $user->username;
+            $data['shoppingList'] = $req->shoppingList;
+
+            Mail::send('shoppingListMail', ['data' => $data], function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+            });
+        }
     }
 }

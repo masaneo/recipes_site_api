@@ -67,6 +67,7 @@ Route::delete('/recipes/admin/editRecipe/deleteRecipe', [RecipeApiController::cl
 Route::post('/recipes/admin/editRecipe/sendChangeSuggestion', [RecipeApiController::class, 'sendChangeSuggestion']);
 Route::put('/recipes/admin/editRecipe/acceptChanges', [RecipeApiController::class, 'acceptChangesAdmin']);
 Route::get('/recipes/getNewestRecipes', [RecipeApiController::class, 'getNewestRecipes']);
+Route::post('/shoppingList/sendToEmail', [RecipeApiController::class, 'sendShoppingListToEmail']);
 
 //Vote routes
 Route::post('/recipes/votes/addVote', [VoteApiController::class, 'addVote']);

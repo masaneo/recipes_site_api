@@ -102,14 +102,14 @@ class UserApiController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if($user->email_verified_at == null) {
-            return Response(["message" => "Adres e-mail nie został potwierdzony, sprawdź ponownie skrzynkę pocztową."]);
-        }
-
         if(!$user || !Hash::check($request->password, $user->password)){
             return response([
                 'message' => 'Nieprawidłowy adres e-mail lub hasło',
             ]);
+        }
+
+        if($user->email_verified_at == null) {
+            return Response(["message" => "Adres e-mail nie został potwierdzony, sprawdź ponownie skrzynkę pocztową."]);
         }
 
         $token = $user->api_token;

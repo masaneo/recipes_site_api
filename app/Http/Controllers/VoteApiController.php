@@ -55,6 +55,7 @@ class VoteApiController extends Controller
         $result = [];
 
         $recipes = Vote::select('recipeId', DB::raw('round(AVG(vote), 2) as srednia'), DB::raw('COUNT(vote) as ilosc'))
+        ->whereMonth('updated_at', now()->month)
         ->groupBy('recipeId')
         ->having('ilosc', '>=', 1) //zwiększyć później żeby wymagane było więcej głosów
         ->orderBy('srednia', 'desc')
